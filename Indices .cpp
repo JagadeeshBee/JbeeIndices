@@ -1,79 +1,68 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
-#include <limits>  
-// For numeric limits
+#include <limits>
+#include <stdexcept>
 
-using namespace std;
+const int MIN_ARRAY_SIZE = 2;
+const int MAX_ARRAY_SIZE = 10000;
 
-// Function to find the indices of two numbers that add up to the target
-vector<int> findTwoSum(const vector<int>& nums, int target) {
-    unordered_map<int, int> numMap;  
-    // Store the complement and corresponding index
-    
+std::vector<int> findTwoSum(const std::vector<int>& nums, int target) {
+    std::unordered_map<int, int> numMap;
+
     for (int i = 0; i < nums.size(); ++i) {
         int complement = target - nums[i];
-        
+
         if (numMap.find(complement) != numMap.end()) {
-            return {numMap[complement], i};  
-            // Return indices of the two numbers
+            return {numMap[complement], i};
         }
-        
-        numMap[nums[i]] = i;  
-        // Store the index of the current number
+
+        numMap[nums[i]] = i;
     }
 
-    // As per problem constraints, we are guaranteed to find exactly one solution.
-    return {}; 
-     // Return an empty vector if no solution is found (this won't happen according to problem constraints)
+    throw std::runtime_error("No solution found, but this should not happen according to problem constraints.");
 }
 
-// Function to get valid integer input from the user within the given range
-int getValidIntegerInput(const string& prompt, int minValue, int maxValue) {
+int getValidIntegerInput(const std::string& prompt, int minValue, int maxValue) {
     int value;
     while (true) {
-        cout << prompt;
-        cin >> value;
-        if (cin.fail() || value < minValue || value > maxValue) {
-            cin.clear();  // Clear error flag
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Ignore invalid input
-            cout << "Invalid input. Please enter a value between " << minValue << " and " << maxValue << ".\n";
+        std::cout << prompt;
+        std::cin >> value;
+        if (std::cin.fail() || value < minValue || value > maxValue) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Please enter a value between " << minValue << " and " << maxValue << ".\n";
         } else {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the buffer after valid input
             return value;
         }
     }
 }
 
-// Function to get the list of integers from the user
-vector<int> getArrayInput(int size) {
-    vector<int> nums;
+std::vector<int> getArrayInput(int size) {
+    std::vector<int> nums;
+    nums.reserve(size); // Reserve space in advance
     for (int i = 0; i < size; ++i) {
-        int num = getValidIntegerInput("Enter element " + to_string(i + 1) + ": ", 
-                                       numeric_limits<int>::min(), numeric_limits<int>::max());
+        int num = getValidIntegerInput("Enter element " + std::to_string(i + 1) + ": ", 
+                                       std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
         nums.push_back(num);
     }
     return nums;
 }
 
 int main() {
-    // Input validation for the number of elements in the array
-    int n = getValidIntegerInput("Enter the number of elements in the array (2 <= nums.length <= 10^4): ", 2, 10000);
+    int n = getValidIntegerInput("Enter the number of elements in the array (2 <= nums.length <= 10^4): ", MIN_ARRAY_SIZE, MAX_ARRAY_SIZE);
     
-    // Input array elements
-    cout << "Enter the elements of the array:\n";
-    vector<int> nums = getArrayInput(n);
+    std::cout << "Enter the elements of the array:\n";
+    std::vector<int> nums = getArrayInput(n);
     
-    // Input validation for the target value
-    int target = getValidIntegerInput("Enter the target value: ", numeric_limits<int>::min(), numeric_limits<int>::max());
+    int target = getValidIntegerInput("Enter the target value: ", std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 
-    // Find the two indices that sum up to the target
-    vector<int> result = findTwoSum(nums, target);
-    
-    if (!result.empty()) {
-        cout << "Indices found: [" << result[0] << ", " << result[1] << "]\n";
-    } else {
-        cout << "No valid solution found.\n";  
-        // This case won't occur due to problem constraints
+    try {
+        std::vector<int> result = findTwoSum(nums, target);
+        std::cout << "Indices found: [" << result[0] << ", " << result[1] << "]\n";
+    } catch (const std::runtime_error& e) {
+        std::cout << e.what() << "\n";  
     }
 
     return 0;
